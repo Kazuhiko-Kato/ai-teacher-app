@@ -14,6 +14,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- ここから追加：プルダウンの文字色を黒にする ---
+st.markdown("""
+<style>
+div[data-baseweb="select"] ul li {
+    color: black !important;
+}
+</style>
+""", unsafe_allow_html=True)
+# --- ここまで追加 ---
+
 # ==========================================
 # 🔑 金庫（secrets）からAPIキーと合言葉を安全に読み込む
 # ==========================================
