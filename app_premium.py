@@ -14,26 +14,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- ここから修正：プルダウンの文字色を黒にする最強コード ---
-st.markdown("""
-<style>
-/* ① 閉じている時の箱の中の文字（選択済みの文字）を黒にする */
-div[data-baseweb="select"] span,
-div[data-baseweb="select"] div {
-    color: #000000 !important;
-}
-
-/* ② クリックして開いた後のリストの文字を黒にする */
-div[data-baseweb="popover"] ul li,
-div[data-baseweb="popover"] ul li span,
-div[data-baseweb="popover"] ul li div,
-ul[data-baseweb="menu"] li span,
-ul[data-baseweb="menu"] li {
-    color: #000000 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-# --- ここまで修正 ---
 # ==========================================
 # 🔑 金庫（secrets）からAPIキーと合言葉を安全に読み込む
 # ==========================================
@@ -112,7 +92,6 @@ def save_log(action, grade, unit, content):
             writer.writerow([now, action, grade, unit, content])
     except Exception as e:
         print(f"ログ保存エラー: {e}")  # 画面には出さず、裏側でエラーを記録
-
 
 
 # ==========================================
@@ -218,11 +197,15 @@ if os.path.exists(image_filename):
         color: #ffffff !important;
     }}
     
-    /* ✨ここが今回の最強の修正！ 白設定の直後に「でもプルダウンは黒！」と宣言する */
-    div[data-testid="stSelectbox"] * {{
-        color: #000000 !important;
-    }}
-    div[data-baseweb="popover"] *, ul[data-baseweb="menu"] * {{
+    /* 🔴【完全解決版】記号(*)を使わず、プルダウンの部品を「直接」名指しして黒にする */
+    div[data-baseweb="select"] span,
+    div[data-baseweb="select"] div,
+    div[data-baseweb="popover"] span,
+    div[data-baseweb="popover"] div,
+    div[data-baseweb="popover"] li,
+    ul[data-baseweb="menu"] li,
+    ul[data-baseweb="menu"] span,
+    ul[data-baseweb="menu"] div {{
         color: #000000 !important;
     }}
     
@@ -240,6 +223,8 @@ if os.path.exists(image_filename):
     </style>
     """
     st.markdown(background_css, unsafe_allow_html=True)
+
+
 # ==========================================
 # 🏛️ 中央・右側のメイン画面レイアウト
 # ==========================================
@@ -269,14 +254,10 @@ with col1:
         if "content_text" not in st.session_state:
             if not GEMINI_API_KEY:
                 st.error("⚠️ APIキーが正しく読み込めていません。")
-
             else:
                 try:
                     with st.spinner("先生が今日の黒板（授業内容）を準備しています..."):
                         client = genai.Client(api_key=GEMINI_API_KEY)
-                        
-                        # 🔴【プロンプトを修正】特定の単元の具体例を削除し、どんな単元にも対応できるように変更
-                        
                         
                         prompt = f"""
                         あなたは、不登校の小中学生を専門に学習支援を行っている、非常に優しく共感力の高いプロの{st.session_state.current_subject}教師です。
@@ -322,11 +303,9 @@ with col1:
                             client = genai.Client(api_key=GEMINI_API_KEY)
                             
                             grading_prompt = f"""
-                            
                             あなたは中学校の【{st.session_state.current_subject}教師】です。
-                           あなたが出題した問題に対して、生徒が答えを提出しました。
+                            あなたが出題した問題に対して、生徒が答えを提出しました。
 
-                            
                             【あなたが出題した問題内容】
                             {st.session_state.content_text}
                             
@@ -412,7 +391,7 @@ with col2:
         try:
             with st.spinner("先生がわかりやすい解説を考えています..."):
                 client = genai.Client(api_key=GEMINI_API_KEY)
-               
+                
                 # 🔴 不登校の生徒に寄り添う「伴走型」のチャット指示書（完全回答バージョン）
                 chat_prompt = f"""
                 あなたは、不登校の小中学生を専門に教えている、非常に優しく共感力の高いプロの{st.session_state.current_subject}教師です。
@@ -440,18 +419,13 @@ with col2:
         user_query = st.text_input("質問を入力してね", label_visibility="collapsed")
         submit_button = st.form_submit_button(label="💬 質問を送る", use_container_width=True)
         
-        
         if submit_button and user_query:
             st.session_state.chat_history.append({"role": "user", "message": user_query})
             if not GEMINI_API_KEY:
                 st.session_state.chat_history.append({"role": "assistant", "message": "⚠️ APIキーが設定されていません。"})
-
             else:
                 ask_gemini_teacher(user_query)
-            # 👇ここに以下の1行を追加！
+                # 👇ここに以下の1行を追加！
                 save_log("質問送信", "中学1年生", st.session_state.current_unit, f"質問内容: {user_query}")
 
             st.rerun()
-
-
-
