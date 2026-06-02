@@ -105,7 +105,7 @@ def check_under_construction(grade, term, subject, unit):
         st.session_state.under_construction = True
         st.session_state.construction_message = f"選んでくれた「{grade}」の「{subject} - {unit}」は、現在AI先生が次のアップデートに向けて一生懸命準備中だよ！\n\n今回の体験版では、**【中学1年生の1学期】**の学習ができるから、左のメニューから選び直してスタートしてみてね！"
         save_log("工事中遭遇", grade, unit, f"未実装エリアへのアクセス（{term}/{subject}）")
-        st.rerun() # リロードして中央画面にバトンタッチ！
+        st.rerun() 
     else:
         st.session_state.under_construction = False
 
@@ -124,34 +124,23 @@ with st.sidebar:
     
     st.write("**今日の学習内容**")
     
-    # ✨ 選んだ教科によって単元のリストを切り替える
     if selected_subject == "数学":
         unit_list = ["正の数と負の数", "文字式の計算", "一元一次方程式", "比例と反比例", "データの分布"]
     elif selected_subject == "英語":
         unit_list = ["アルファベットと発音", "be動詞と一般動詞", "代名詞"]
     elif selected_subject == "国語":
         unit_list = ["小説・物語文", "説明文・論理的文章", "言葉の単位・文法"]
-        
 
     selected_unit = st.radio("選択してください", unit_list, label_visibility="collapsed")
     st.write("---")
     
-    # =========================================================
-    # ✨【リアルタイムチェック】メニューが切り替わった瞬間に作動
-    # =========================================================
     is_ready = (selected_grade == "中学1年生" and selected_term == "1学期")
     if is_ready:
-        # 1年生の1学期が選ばれたら、ボタンを押す前でも自動で工事中ロックを解除する
         st.session_state.under_construction = False
     
-    # =========================================================
-    # 👉 学習スタートボタン
-    # =========================================================
     if st.button("👉 この単元の学習をスタート", type="primary"):
-        # 1. まず工事中かどうかをチェック
         check_under_construction(selected_grade, selected_term, selected_subject, selected_unit)
         
-        # 2. 通常通りの学習スタート処理
         st.session_state.started = True
         st.session_state.current_subject = selected_subject
         st.session_state.current_unit = selected_unit       
@@ -165,7 +154,7 @@ with st.sidebar:
 
 
 # ==========================================
-# 🖼️ バックグラウンド画像の読み込みとCSS（★完全に直した最強設定★）
+# 🖼️ バックグラウンド画像の読み込みとCSS（★完全修正版★）
 # ==========================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -189,31 +178,34 @@ if os.path.exists(image_filename):
         background-color: #11151c;
     }}
     
-    /* 🚨【修正1】 UIが壊れる原因だった「div, span」を外し、文章や見出しだけを白にする安全なルールに変更 */
-    h1, h2, h3, h4, h5, h6, p, label, li {{
+    /* ベースの文字色は白 */
+    h1, h2, h3, h4, h5, h6, p, label, small {{
+        color: #ffffff !important;
+    }}
+    div[data-testid="stMarkdownContainer"] li {{
         color: #ffffff !important;
     }}
     
-    /* 🚨【修正2】 プルダウンの中身とリストを、絶対に白背景＋黒文字に固定する設定 */
-    div[data-baseweb="select"] > div {{
-        background-color: #ffffff !important;
-        color: #000000 !important;
-    }}
+    /* 🚨【スクショ解析からの確定コード】ワープ先のリスト要素を直接黒にする */
+    /* 1. 閉じているときの選択中の文字 */
     div[data-baseweb="select"] * {{
         color: #000000 !important;
     }}
-    ul[data-baseweb="menu"], ul[data-baseweb="menu"] * {{
+    /* 2. リスト全体の背景色を白にする */
+    ul[role="listbox"] {{
         background-color: #ffffff !important;
+    }}
+    /* 3. 開いた時のリストの文字色（スクショの li role="option" を狙い撃ち） */
+    li[role="option"], li[role="option"] * {{
         color: #000000 !important;
     }}
     
-    /* ボタン内の文字色を非ホバー時でもはっきり white に表示 */
+    /* ボタン内の文字色設定 */
     .stButton > button {{
         color: #ffffff !important;
         background-color: #262730;
         border: 1px solid #464855;
     }}
-    /* プライマリボタン（スタートボタン）の目立たせ設定 */
     .stButton > button[data-testid="baseButton-primary"] {{
         background-color: #ff4b4b;
         border: none;
@@ -226,10 +218,9 @@ if os.path.exists(image_filename):
 # ==========================================
 # 🏛️ 中央・右側のメイン画面レイアウト
 # ==========================================
-# ✨ ここに工事中メッセージを中央最優先で出す仕掛けを挟みます！
 if st.session_state.under_construction:
     st.info(f"🚧 **AI先生からのお知らせ** 🚧\n\n{st.session_state.construction_message}")
-    st.stop() # 💡 ここで止めることで、中央にメッセージを出しつつ、下の古い画面を描画させません
+    st.stop()
 
 col1, col2 = st.columns([1.2, 1.0])
 
@@ -383,13 +374,11 @@ with col2:
     
     st.markdown("<p style='color: #ffffff; font-size: 14px; margin-bottom: 5px;'>わからないことがあれば、いつでも聞いてね！</p>", unsafe_allow_html=True)
     
-    # AIへの問い合わせロジック
     def ask_gemini_teacher(user_input):
         try:
             with st.spinner("先生がわかりやすい解説を考えています..."):
                 client = genai.Client(api_key=GEMINI_API_KEY)
                 
-                # 🔴 不登校の生徒に寄り添う「伴走型」のチャット指示書（完全回答バージョン）
                 chat_prompt = f"""
                 あなたは、不登校の小中学生を専門に教えている、非常に優しく共感力の高いプロの{st.session_state.current_subject}教師です。
                 生徒から「{user_input}」という質問やメッセージが届きました。
@@ -411,7 +400,6 @@ with col2:
         except Exception as e:
             st.session_state.chat_history.append({"role": "assistant", "message": f"❌ 通信エラー: {str(e)}"})
 
-    # 入力フォーム構造
     with st.form(key="chat_form", clear_on_submit=True):
         user_query = st.text_input("質問を入力してね", label_visibility="collapsed")
         submit_button = st.form_submit_button(label="💬 質問を送る", use_container_width=True)
