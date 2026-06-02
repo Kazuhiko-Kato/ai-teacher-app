@@ -53,11 +53,11 @@ if not st.session_state.logged_in:
 # ==========================================
 if "started" not in st.session_state:
     st.session_state.started = False
-if "under_construction" not in st.session_state:  # ✨ これを追加！
+if "under_construction" not in st.session_state:  
     st.session_state.under_construction = False
-if "construction_message" not in st.session_state: # ✨ これを追加！
+if "construction_message" not in st.session_state: 
     st.session_state.construction_message = ""
-if "current_subject" not in st.session_state:  # ✨ これを追加！
+if "current_subject" not in st.session_state:  
     st.session_state.current_subject = "数学"
 if "current_unit" not in st.session_state:
     st.session_state.current_unit = "未選択"
@@ -102,14 +102,11 @@ def check_under_construction(grade, term, subject, unit):
     is_ready = (grade == "中学1年生" and term == "1学期")
     
     if not is_ready:
-        # ✨ ここではメッセージを画面に出さず、記憶するだけにします
         st.session_state.under_construction = True
         st.session_state.construction_message = f"選んでくれた「{grade}」の「{subject} - {unit}」は、現在AI先生が次のアップデートに向けて一生懸命準備中だよ！\n\n今回の体験版では、**【中学1年生の1学期】**の学習ができるから、左のメニューから選び直してスタートしてみてね！"
-        
         save_log("工事中遭遇", grade, unit, f"未実装エリアへのアクセス（{term}/{subject}）")
         st.rerun() # リロードして中央画面にバトンタッチ！
     else:
-        # 💡 準備OKなエリアが選ばれたら、フラグを折ってそのまま下へスルーさせるだけ！
         st.session_state.under_construction = False
 
 
@@ -123,7 +120,7 @@ with st.sidebar:
     
     selected_grade = st.selectbox("学年を選んでね", ["中学1年生", "中学2年生", "中学3年生"])
     selected_term = st.selectbox("学期を選んでね", ["1学期", "2学期", "3学期"])
-    selected_subject = st.selectbox("教科を選んでね", ["数学", "英語", "国語"]) # ✨ 新規追加
+    selected_subject = st.selectbox("教科を選んでね", ["数学", "英語", "国語"]) 
     
     st.write("**今日の学習内容**")
     
@@ -151,7 +148,7 @@ with st.sidebar:
     # 👉 学習スタートボタン
     # =========================================================
     if st.button("👉 この単元の学習をスタート", type="primary"):
-        # 1. まず工事中かどうかをチェック（1年1学期以外なら、ここでTrueになってリロードされる）
+        # 1. まず工事中かどうかをチェック
         check_under_construction(selected_grade, selected_term, selected_subject, selected_unit)
         
         # 2. 通常通りの学習スタート処理
@@ -168,7 +165,7 @@ with st.sidebar:
 
 
 # ==========================================
-# 🖼️ バックグラウンド画像の読み込みとCSS
+# 🖼️ バックグラウンド画像の読み込みとCSS（★完全に直した最強設定★）
 # ==========================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -192,20 +189,21 @@ if os.path.exists(image_filename):
         background-color: #11151c;
     }}
     
-    /* 基本の文字色は強制白一色化 */
-    h1, h2, h3, h4, h5, h6, p, span, label, li, ul, ol, div, small {{
+    /* 🚨【修正1】 UIが壊れる原因だった「div, span」を外し、文章や見出しだけを白にする安全なルールに変更 */
+    h1, h2, h3, h4, h5, h6, p, label, li {{
         color: #ffffff !important;
     }}
     
-    /* 🔴【完全解決版】記号(*)を使わず、プルダウンの部品を「直接」名指しして黒にする */
-    div[data-baseweb="select"] span,
-    div[data-baseweb="select"] div,
-    div[data-baseweb="popover"] span,
-    div[data-baseweb="popover"] div,
-    div[data-baseweb="popover"] li,
-    ul[data-baseweb="menu"] li,
-    ul[data-baseweb="menu"] span,
-    ul[data-baseweb="menu"] div {{
+    /* 🚨【修正2】 プルダウンの中身とリストを、絶対に白背景＋黒文字に固定する設定 */
+    div[data-baseweb="select"] > div {{
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }}
+    div[data-baseweb="select"] * {{
+        color: #000000 !important;
+    }}
+    ul[data-baseweb="menu"], ul[data-baseweb="menu"] * {{
+        background-color: #ffffff !important;
         color: #000000 !important;
     }}
     
@@ -287,7 +285,7 @@ with col1:
         if "content_text" in st.session_state:
             st.markdown(
                 f"""
-                <div style='background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px; line-height: 1.6;'>
+                <div style='background-color: rgba(255,255,255,0.05); color: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 20px; line-height: 1.6;'>
                     {st.session_state.content_text}
                 </div>
                 """, unsafe_allow_html=True
@@ -331,7 +329,6 @@ with col1:
                                 contents=grading_prompt
                             )
                             st.session_state.grading_result = grading_response.text
-                            # 👇ここに以下の1行を追加！
                             save_log("テスト提出", "中学1年生", st.session_state.current_unit, f"生徒の解答: {student_answer} / 採点結果: {grading_response.text[:100]}...")
 
                             st.rerun()
@@ -425,7 +422,6 @@ with col2:
                 st.session_state.chat_history.append({"role": "assistant", "message": "⚠️ APIキーが設定されていません。"})
             else:
                 ask_gemini_teacher(user_query)
-                # 👇ここに以下の1行を追加！
                 save_log("質問送信", "中学1年生", st.session_state.current_unit, f"質問内容: {user_query}")
 
             st.rerun()
