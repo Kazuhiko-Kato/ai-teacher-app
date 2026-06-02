@@ -218,8 +218,11 @@ if os.path.exists(image_filename):
         color: #ffffff !important;
     }}
     
-    /* 学年・学期の入力欄（セレクトボックス）の文字色だけをピンポイントで黒に修正 */
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] * {{
+    /* ✨ここが今回の最強の修正！ 白設定の直後に「でもプルダウンは黒！」と宣言する */
+    div[data-testid="stSelectbox"] * {{
+        color: #000000 !important;
+    }}
+    div[data-baseweb="popover"] *, ul[data-baseweb="menu"] * {{
         color: #000000 !important;
     }}
     
@@ -237,8 +240,6 @@ if os.path.exists(image_filename):
     </style>
     """
     st.markdown(background_css, unsafe_allow_html=True)
-
-
 # ==========================================
 # 🏛️ 中央・右側のメイン画面レイアウト
 # ==========================================
