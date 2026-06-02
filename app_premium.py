@@ -98,7 +98,6 @@ def save_log(action, grade, unit, content):
 # 🚧 未実装機能（工事中）の自動ガードシステム
 # ==========================================
 def check_under_construction(grade, term, subject, unit):
-    # 🟢 PoC用に「中学1年生」の「1学期」なら全教科（数学・英語・国語）動くように設定
     is_ready = (grade == "中学1年生" and term == "1学期")
     
     if not is_ready:
@@ -111,18 +110,22 @@ def check_under_construction(grade, term, subject, unit):
 
 
 # ==========================================
-# 👈 左側サイドバー（メニュー設定欄）
+# 👈 左側サイドバー（メニュー設定欄：★バグ回避版★）
 # ==========================================
 with st.sidebar:
     st.title("👨‍🏫 中学生AI先生")
     st.caption("~プレミアム学習環境~")
     st.write("---")
     
-    selected_grade = st.selectbox("学年を選んでね", ["中学1年生", "中学2年生", "中学3年生"])
-    selected_term = st.selectbox("学期を選んでね", ["1学期", "2学期", "3学期"])
-    selected_subject = st.selectbox("教科を選んでね", ["数学", "英語", "国語"]) 
+    # 🚨 文字が消える原因だった selectbox を完全に廃止し、確実に白文字で見える radio 形式に変更
+    selected_grade = st.radio("▼ 学年を選んでね", ["中学1年生", "中学2年生", "中学3年生"])
+    st.write("")
+    selected_term = st.radio("▼ 学期を選んでね", ["1学期", "2学期", "3学期"])
+    st.write("")
+    selected_subject = st.radio("▼ 教科を選んでね", ["数学", "英語", "国語"]) 
     
-    st.write("**今日の学習内容**")
+    st.write("---")
+    st.write("**▼ 今日の学習内容**")
     
     if selected_subject == "数学":
         unit_list = ["正の数と負の数", "文字式の計算", "一元一次方程式", "比例と反比例", "データの分布"]
@@ -131,7 +134,7 @@ with st.sidebar:
     elif selected_subject == "国語":
         unit_list = ["小説・物語文", "説明文・論理的文章", "言葉の単位・文法"]
 
-    selected_unit = st.radio("選択してください", unit_list, label_visibility="collapsed")
+    selected_unit = st.radio("単元選択", unit_list, label_visibility="collapsed")
     st.write("---")
     
     is_ready = (selected_grade == "中学1年生" and selected_term == "1学期")
@@ -154,7 +157,7 @@ with st.sidebar:
 
 
 # ==========================================
-# 🖼️ バックグラウンド画像の読み込みとCSS（★根本修正版★）
+# 🖼️ バックグラウンド画像の読み込みとCSS
 # ==========================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -178,16 +181,8 @@ if os.path.exists(image_filename):
         background-color: #11151c;
     }}
     
-    /* 🛠️ プルダウンを邪魔しない安全な白文字ルールに変更（divやspanやliを全除外） */
-    h1, h2, h3, h4, h5, h6, p, label, small {{
-        color: #ffffff !important;
-    }}
-    
-    /* AI先生の授業エリアの文字・箇条書きだけを個別に白にする */
-    div[data-testid="stMarkdownContainer"] {{
-        color: #ffffff !important;
-    }}
-    div[data-testid="stMarkdownContainer"] * {{
+    /* 画面内のすべての文字（ボタン、テキスト、ラジオの選択肢）を強制的に白一色にする */
+    h1, h2, h3, h4, h5, h6, p, label, small, div, span {{
         color: #ffffff !important;
     }}
     
@@ -247,7 +242,7 @@ with col1:
                         ・最初に「今日この単元を選んで勉強を始めようとした行動」そのものを、優しく褒めて認めてあげてください。
                         ・「{st.session_state.current_unit}」の核心となる重要な概念について、直感的に理解できるよう、身近な例え話を必ず交えて解説してください。
                         ・専門用語を並べるのではなく、中学生に語りかけるような優しい口調（「〜だよ」「〜してみよう！」）を徹底してください。
-                        ・一画面で読みやすいよう、適度な改行と箇条書き、Markdownでの太字（**強調**）を使って、視覚的にスッキリ整理してください。
+                        ・一画面で読みやすいよう、適度な改行と箇流書き、Markdownでの太字（**強調**）を使って、視覚的にスッキリ整理してください。
 
                         【2. 確認テストに挑戦！】
                         ・上記の解説内容が理解できたかを「スモールステップ」で確かめるための、記述式の問題を【1問だけ】作成してください。
@@ -379,7 +374,7 @@ with col2:
                 1. 最初の1行目で、質問してくれた勇気や行動を「素晴らしいね！」「聞いてくれて嬉しいよ」と必ず褒めてください。
                 2. 生徒の質問に対して、ヒントで終わらせず、最後まで分かりやすく「完全な答えと解説」を直接教えてあげてください。
                 3. どうしてその答えになるのか、理由や手順をステップバイステップで優しく丁寧に説明してください。
-                4. 生徒が「わからない」「むずかしい」と弱音を吐いたときは、勉強の話を一度置いて、「難しく感じるのは当然だよ」「焦らなくて大丈夫 nudge」と心に寄り添う言葉をかけてください。
+                4. 生徒が「わからない」「むずかしい」と弱音を吐いたときは、勉強の話を一度置いて、「難しく感じるのは当然だよ」「焦らなくて大丈夫」と心に寄り添う言葉をかけてください。
                 5. 文章は一度にたくさん送らず、中学生がチャットでパッと読めるように、短く簡潔に、改行を使って記述してください。
                 """
                 response = client.models.generate_content(
