@@ -154,7 +154,7 @@ with st.sidebar:
 
 
 # ==========================================
-# 🖼️ バックグラウンド画像の読み込みとCSS（★完全修正版★）
+# 🖼️ バックグラウンド画像の読み込みとCSS（★根本修正版★）
 # ==========================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -178,26 +178,17 @@ if os.path.exists(image_filename):
         background-color: #11151c;
     }}
     
-    /* ベースの文字色は白 */
+    /* 🛠️ プルダウンを邪魔しない安全な白文字ルールに変更（divやspanやliを全除外） */
     h1, h2, h3, h4, h5, h6, p, label, small {{
         color: #ffffff !important;
     }}
-    div[data-testid="stMarkdownContainer"] li {{
+    
+    /* AI先生の授業エリアの文字・箇条書きだけを個別に白にする */
+    div[data-testid="stMarkdownContainer"] {{
         color: #ffffff !important;
     }}
-    
-    /* 🚨【スクショ解析からの確定コード】ワープ先のリスト要素を直接黒にする */
-    /* 1. 閉じているときの選択中の文字 */
-    div[data-baseweb="select"] * {{
-        color: #000000 !important;
-    }}
-    /* 2. リスト全体の背景色を白にする */
-    ul[role="listbox"] {{
-        background-color: #ffffff !important;
-    }}
-    /* 3. 開いた時のリストの文字色（スクショの li role="option" を狙い撃ち） */
-    li[role="option"], li[role="option"] * {{
-        color: #000000 !important;
+    div[data-testid="stMarkdownContainer"] * {{
+        color: #ffffff !important;
     }}
     
     /* ボタン内の文字色設定 */
@@ -388,7 +379,7 @@ with col2:
                 1. 最初の1行目で、質問してくれた勇気や行動を「素晴らしいね！」「聞いてくれて嬉しいよ」と必ず褒めてください。
                 2. 生徒の質問に対して、ヒントで終わらせず、最後まで分かりやすく「完全な答えと解説」を直接教えてあげてください。
                 3. どうしてその答えになるのか、理由や手順をステップバイステップで優しく丁寧に説明してください。
-                4. 生徒が「わからない」「むずかしい」と弱音を吐いたときは、勉強の話を一度置いて、「難しく感じるのは当然だよ」「焦らなくて大丈夫」と心に寄り添う言葉をかけてください。
+                4. 生徒が「わからない」「むずかしい」と弱音を吐いたときは、勉強の話を一度置いて、「難しく感じるのは当然だよ」「焦らなくて大丈夫 nudge」と心に寄り添う言葉をかけてください。
                 5. 文章は一度にたくさん送らず、中学生がチャットでパッと読めるように、短く簡潔に、改行を使って記述してください。
                 """
                 response = client.models.generate_content(
