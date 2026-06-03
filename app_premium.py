@@ -151,6 +151,38 @@ with st.sidebar:
             del st.session_state.content_text
         st.rerun()
 
+# ==========================================追加スタート
+# 🎨 セレクトボックス文字色修正CSS（常時適用）
+# ==========================================
+st.markdown("""
+<style>
+/* セレクトボックスの選択済み文字 */
+[data-testid="stSidebar"] [data-baseweb="select"] div,
+[data-testid="stSidebar"] [data-baseweb="select"] span {
+    color: #ffffff !important;
+    background-color: #1e2130 !important;
+}
+
+/* ドロップダウンを開いたときの選択肢リスト */
+[data-baseweb="popover"] li,
+[data-baseweb="menu"] li {
+    color: #ffffff !important;
+    background-color: #1e2130 !important;
+}
+
+/* 選択肢にマウスを乗せたとき */
+[data-baseweb="menu"] li:hover {
+    background-color: #2e3250 !important;
+    color: #ffffff !important;
+}
+
+/* ラジオボタンのテキスト */
+[data-testid="stSidebar"] [data-testid="stRadio"] label span {
+    color: #ffffff !important;
+}
+</style>
+""", unsafe_allow_html=True)
+# ==========================================追加終わり
 
 # ==========================================
 # 🖼️ バックグラウンド画像の読み込みとCSS（★完全クリーン版★）
