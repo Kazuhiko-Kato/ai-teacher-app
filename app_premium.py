@@ -152,33 +152,37 @@ with st.sidebar:
         st.rerun()
 
 # ==========================================追加スタート
+# ==========================================
 # 🎨 セレクトボックス文字色修正CSS（常時適用）
 # ==========================================
 st.markdown("""
 <style>
-/* セレクトボックスの選択済み文字 */
-[data-testid="stSidebar"] [data-baseweb="select"] div,
-[data-testid="stSidebar"] [data-baseweb="select"] span {
+/* セレクトボックス本体のあらゆる子要素 */
+[data-testid="stSidebar"] * {
     color: #ffffff !important;
+}
+
+/* セレクトボックスの背景 */
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
     background-color: #1e2130 !important;
+    border-color: #464855 !important;
 }
 
-/* ドロップダウンを開いたときの選択肢リスト */
-[data-baseweb="popover"] li,
-[data-baseweb="menu"] li {
-    color: #ffffff !important;
-    background-color: #1e2130 !important;
+/* ドロップダウンリストの背景（サイドバー外に展開されるため別指定） */
+[data-baseweb="popover"] * {
+    color: #111111 !important;
+    background-color: #ffffff !important;
 }
 
-/* 選択肢にマウスを乗せたとき */
-[data-baseweb="menu"] li:hover {
-    background-color: #2e3250 !important;
-    color: #ffffff !important;
+/* ホバー時のハイライト */
+[data-baseweb="menu"] [role="option"]:hover {
+    background-color: #e8e8e8 !important;
 }
 
-/* ラジオボタンのテキスト */
-[data-testid="stSidebar"] [data-testid="stRadio"] label span {
-    color: #ffffff !important;
+/* 選択中の項目 */
+[aria-selected="true"] {
+    background-color: #dce8ff !important;
+    color: #111111 !important;
 }
 </style>
 """, unsafe_allow_html=True)
